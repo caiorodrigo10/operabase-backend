@@ -210,3 +210,63 @@ Este projeto está sob a licença MIT. Veja [LICENSE](LICENSE) para mais informa
 ---
 
 **Desenvolvido com ❤️ para revolucionar a gestão clínica**
+
+# Operabase Backend
+
+🚀 **Express.js + TypeScript backend deployed on AWS Elastic Beanstalk**
+
+## 🌟 Features
+
+- **Express.js + TypeScript** - Modern Node.js backend
+- **Supabase Integration** - PostgreSQL database + Storage
+- **Redis Cache** - AWS ElastiCache for performance
+- **WhatsApp Integration** - Evolution API
+- **AI Features** - OpenAI + Anthropic integration
+- **Real-time** - WebSocket support
+- **Multi-tenant** - Clinic isolation
+- **CI/CD** - Automatic deployment from GitHub
+
+## 🚀 Deployment
+
+This application is automatically deployed to AWS when pushing to the `main` branch.
+
+### Infrastructure:
+- **AWS Elastic Beanstalk** (São Paulo - sa-east-1)
+- **AWS ElastiCache Redis** 
+- **GitHub Actions CI/CD**
+
+### Environment:
+- **Production**: Deployed automatically on push to `main`
+- **Region**: São Paulo (sa-east-1)
+- **Instance**: t3.small with auto-scaling
+
+## 📝 Environment Variables
+
+Required environment variables are configured in AWS Elastic Beanstalk:
+
+```bash
+NODE_ENV=production
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_service_key
+REDIS_URL=redis://your-redis-endpoint:6379
+OPENAI_API_KEY=your_openai_key
+# ... and more
+```
+
+## 🔧 Local Development
+
+```bash
+npm install
+npm run dev
+```
+
+## 📦 Deployment Pipeline
+
+1. Push to `main` branch
+2. GitHub Actions builds and tests
+3. Deploys to AWS Elastic Beanstalk
+4. Health checks verify deployment
+
+---
+
+**Last Updated**: $(date)
