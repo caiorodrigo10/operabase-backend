@@ -14,7 +14,9 @@
     "start:dev": "NODE_ENV=development tsx --env-file=.env server/index.ts",
     "check": "tsc",
     "db:push": "drizzle-kit push",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "deploy:aws": "zip -r deploy.zip server/ Procfile .ebextensions/ package.json && aws s3 cp deploy.zip s3://elasticbeanstalk-sa-east-1-$(aws sts get-caller-identity --query Account --output text)/",
+    "aws:install": "cd server && npm install --production"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",

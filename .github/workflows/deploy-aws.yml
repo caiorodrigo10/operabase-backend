@@ -1,0 +1,34 @@
+name: Deploy Backend to AWS
+
+on:
+  push:
+    branches: [main]
+    paths: ['server/**']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Create deployment package
+        run: |
+          zip -r deploy.zip server/ Procfile .ebextensions/ package.json
+      
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: operabase-backend-mvp
+          environment_name: operabase-backend-mvp-env-1
+          region: sa-east-1
+          version_label: ${{ github.sha }}
+          deployment_package: deploy.zip
+          wait_for_environment_recovery: 300 
