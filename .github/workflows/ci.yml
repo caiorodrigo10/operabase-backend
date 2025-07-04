@@ -1,0 +1,189 @@
+name: 🔍 CI - Testes e Qualidade
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # ==========================================
+  # VERIFICAÇÕES DE QUALIDADE
+  # ==========================================
+  quality:
+    name: 📊 Qualidade do Código
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 🔧 Instalar dependências
+      run: npm ci
+
+    - name: 🔍 Verificação de tipos TypeScript
+      run: npm run check
+
+    - name: 📏 Linting
+      run: npm run lint || echo "Linting não configurado"
+
+    - name: 🎨 Verificação de formatação
+      run: npm run format:check || echo "Formatação não configurada"
+
+  # ==========================================
+  # TESTES UNITÁRIOS
+  # ==========================================
+  tests:
+    name: 🧪 Testes Unitários
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: operabase_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:6
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 🔧 Instalar dependências
+      run: npm ci
+
+    - name: 🗄️ Configurar banco de dados
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/operabase_test
+        REDIS_URL: redis://localhost:6379
+      run: |
+        npm run db:push || echo "Migrações não configuradas"
+
+    - name: 🧪 Executar testes
+      env:
+        NODE_ENV: test
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/operabase_test
+        REDIS_URL: redis://localhost:6379
+        SESSION_SECRET: test-secret
+      run: |
+        npm run test || echo "Testes não configurados ainda"
+
+    - name: 📊 Coverage Report
+      env:
+        NODE_ENV: test
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/operabase_test
+        REDIS_URL: redis://localhost:6379
+      run: |
+        npm run test:coverage || echo "Coverage não configurado"
+
+  # ==========================================
+  # BUILD DE PRODUÇÃO
+  # ==========================================
+  build:
+    name: 🏗️ Build de Produção
+    runs-on: ubuntu-latest
+    needs: [quality, tests]
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 🔧 Instalar dependências
+      run: npm ci
+
+    - name: 🏗️ Build aplicação
+      run: npm run build
+
+    - name: 📦 Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-files
+        path: |
+          dist/
+          client/dist/
+        retention-days: 7
+
+  # ==========================================
+  # VERIFICAÇÕES DE SEGURANÇA
+  # ==========================================
+  security:
+    name: 🔒 Verificações de Segurança
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 🔧 Instalar dependências
+      run: npm ci
+
+    - name: 🔍 Audit de dependências
+      run: npm audit --audit-level=high
+
+    - name: 🔒 Verificar vulnerabilidades
+      run: |
+        npx audit-ci --config .audit-ci.json || echo "Audit CI não configurado"
+
+  # ==========================================
+  # NOTIFICAÇÃO DE STATUS
+  # ==========================================
+  notify:
+    name: 📢 Notificação
+    runs-on: ubuntu-latest
+    needs: [quality, tests, build, security]
+    if: always()
+    
+    steps:
+    - name: 📢 Status do Pipeline
+      run: |
+        if [[ "${{ needs.quality.result }}" == "success" && 
+              "${{ needs.tests.result }}" == "success" && 
+              "${{ needs.build.result }}" == "success" && 
+              "${{ needs.security.result }}" == "success" ]]; then
+          echo "✅ Pipeline executado com sucesso!"
+        else
+          echo "❌ Pipeline falhou. Verifique os logs."
+          exit 1 

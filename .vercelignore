@@ -1,0 +1,15 @@
+# Ignore source files but keep dist and api
+client/
+server/
+!dist/
+!api/
+
+# Ignore development files
+node_modules/
+.env
+.env.local
+.git/
+
+# Keep important config files
+!package.json
+!vercel.json 

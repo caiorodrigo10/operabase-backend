@@ -1,0 +1,15 @@
+Este é um teste do sistema de upload de PDF do RAG.
+
+Para testar o upload, você pode usar a interface web:
+1. Acesse /base-conhecimento/2 (ou qualquer ID de knowledge base)
+2. Clique em "Adicionar Documento"
+3. Escolha "Upload PDF" 
+4. Selecione um arquivo PDF
+5. Clique em "Carregar PDF"
+
+O sistema agora possui:
+✅ Endpoint /api/rag/documents/upload funcionando
+✅ Validação de arquivo PDF
+✅ Integração com estrutura oficial LangChain
+✅ Salvamento na tabela documents com metadata correto
+✅ Isolamento multi-tenant por clinic_id

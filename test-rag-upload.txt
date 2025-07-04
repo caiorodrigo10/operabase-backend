@@ -1,0 +1,9 @@
+Este é um documento de teste para validar o sistema RAG.
+
+O sistema deve ser capaz de:
+1. Processar este texto
+2. Dividir em chunks apropriados
+3. Gerar embeddings vetoriais
+4. Armazenar na estrutura oficial LangChain
+
+Este conteúdo será usado para testar a funcionalidade de busca semântica do sistema.
