@@ -2,6 +2,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+// AWS Deploy Test - v1.0.0
+
 import express, { type Request, Response, NextFunction } from "express";
 import { setupVite, serveStatic, log } from "./vite";
 import { createApiRouter } from "./api/v1";
